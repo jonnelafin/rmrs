@@ -31,7 +31,7 @@ fn main() {
     window.set_background_color(0, 0, 20);
 	let mut time = 10;
     while window.is_open() && !window.is_key_down(Key::Escape) {
-    	//player_pos = ( (WIDTH as u32 / 2 ) as f64 + ((time as f64)/10.0).sin() * (HEIGHT as f64) / 2.0) as u32;
+    	ai_pos = ( (HEIGHT as u32 / 2 ) as f64 + ((time as f64)/10.0).sin() * ((HEIGHT as f64)*0.8 - (HEIGHT as f64)*0.2) / 2.0) as u32;
 		if window.is_key_down(Key::Up) {
 			player_pos -= player_speed;
 		}
@@ -42,7 +42,11 @@ fn main() {
         	let y = i / HEIGHT;
         	let x = i % WIDTH;
             buffer[i] = ( (x as u32 + y as u32) as f32  % (time as f32 /2.0) ) as u32;//i as u32 + time ^ 10;
-            if ( (y as f64)-(player_pos as f64) ).abs() < 100.0{
+            let mut ppos = (player_pos as f64); //% (HEIGHT as f64);
+            if ppos < 1.0{
+            	ppos = 1.0;
+            }
+            if ( (y as f64)-(ppos) ).abs() < 100.0{
             	if (x as f64) > 40.0 && (x as f64) < 61.0{
             		buffer[i] = 0x00ffffff;
             	}
