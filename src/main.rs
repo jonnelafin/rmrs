@@ -17,6 +17,8 @@ fn main() {
 	let mut vel_x = -ball_speed;
 	
     let mut buffer: Vec<u32> = vec![0; WIDTH * HEIGHT];
+    let mut paint_mode = false;
+    let mut paint_cool = 0.0;
 
     let mut window = Window::new(
         "RMRS - ESC to exit",
@@ -38,9 +40,18 @@ fn main() {
     window.set_background_color(0, 0, 0);
 	let mut time = 10;
     while window.is_open() && !window.is_key_down(Key::Escape) {
+        let w = WIDTH as f64;
+        let h = HEIGHT as f64;
     	//ai_pos = ( (HEIGHT as u32 / 2 ) as f64 + ((time as f64)/10.0).sin() * ((HEIGHT as f64)*0.8 - (HEIGHT as f64)*0.2) / 2.0) as u32;
 		let jitter = rand::thread_rng().gen_range(10, 101) as f64 / 10.0 + 50.0;
 		ai_pos = ball_y as u32 + jitter as u32;
+		if window.is_key_down(Key::Space){
+			if(paint_cool < 0.001){
+				paint_cool = 20.0;
+				paint_mode = !paint_mode;
+			}
+		}
+		paint_cool -= 1.0;
 		if window.is_key_down(Key::Up) {
 			player_pos -= player_speed;
 			player_pos = player_pos.max(0.0);
@@ -87,10 +98,17 @@ fn main() {
 			
        		let vx = x;
        		let vy = y;
-       		let po = ((vx^vy) as f64).rem_euclid((buffer.len() as f64));
+       		let mut po = 0.0;
+       		if paint_mode{
+       			po = ((vx^vy) as f64).rem_euclid((buffer.len() as f64));
+       		}
+       		else{
+       			po = (i+i)/*((vy as f64 * h) + (vx as f64))*/ as f64 % (buffer.len() as f64);
+       			//po = ((vy^vx) as f64).rem_euclid((buffer.len() as f64));
+       		}
        		//let po = vx+vy;
         	if po < buffer.len() as f64{
-        		buffer[i] = buffer[po as usize];
+        		buffer[i] = (buffer[po as usize] as f64 * 0.25 + 2.5) as u32;
         	}
 
             let mut ppos = player_pos as f64; //% (HEIGHT as f64);
@@ -103,7 +121,6 @@ fn main() {
             	}
             }
             if ( (y as f64)-(ai_pos as f64) ).abs() < 100.0{
-            	let w = WIDTH as f64;
             	if (x as f64) < (w-40.0) && (x as f64) > (w-61.0){
             		buffer[i] = 0x00ffffff;
             	}
